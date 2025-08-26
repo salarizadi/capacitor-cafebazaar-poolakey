@@ -1,6 +1,7 @@
 # @salarizadi/capacitor-cafebazaar-poolakey
 
-[![npm version](https://badge.fury.io/js/%40salarizadi%2Fcapacitor-cafebazaar-poolakey.svg)](https://badge.fury.io/js/%40salarizadi%2Fcapacitor-cafebazaar-poolakey)
+[![npm version](https://badge.fury.io/js/%40salarizadi%2Fcapacitor-cafebazaar-poolakey.svg)](https://www.npmjs.com/package/@salarizadi/capacitor-cafebazaar-poolakey)
+![Downloads](https://img.shields.io/npm/dt/@salarizadi/capacitor-cafebazaar-poolakey)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 A Capacitor plugin for implementing Cafebazaar (Iranian Android App Store) in-app billing using the Poolakey library.
