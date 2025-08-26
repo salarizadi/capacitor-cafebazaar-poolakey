@@ -24,7 +24,7 @@ npx cap sync
 
 ## Basic Usage
 
-```javascript
+```typescript
 import { CafebazaarPoolakey } from '@salarizadi/capacitor-cafebazaar-poolakey';
 
 // OR
@@ -35,6 +35,12 @@ await CafebazaarPoolakey.initialize({
     rsaPublicKey: 'YOUR_RSA_PUBLIC_KEY'
 });
 
+// Listen to purchase state changes
+CafebazaarPoolakey.addListener('purchaseStateChanged', (state) => {
+    console.log('Purchase state:', state);
+    // state.state can be: 'PURCHASE_BEGAN', 'PURCHASED', 'CANCELLED', 'FAILED'
+});
+
 // Get products
 const products = await CafebazaarPoolakey.getProducts({
     skus: ['product_id_1', 'product_id_2']
@@ -42,7 +48,8 @@ const products = await CafebazaarPoolakey.getProducts({
 
 // Make a purchase
 const result = await CafebazaarPoolakey.purchaseProduct({
-    productId: 'product_id_1'
+    productId: 'product_id_1',
+    payload: 'developer_payload' // optional
 });
 
 // Consume the purchase
