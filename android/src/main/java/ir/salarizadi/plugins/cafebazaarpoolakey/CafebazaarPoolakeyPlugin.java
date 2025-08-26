@@ -1,11 +1,8 @@
 package ir.salarizadi.plugins.cafebazaarpoolakey;
 
-import android.util.Log;
-
+import java.util.Iterator;
 import java.util.List;
 import java.util.ArrayList;
-
-import org.json.JSONArray;
 
 import com.getcapacitor.JSArray;
 import com.getcapacitor.JSObject;
@@ -20,7 +17,6 @@ import ir.cafebazaar.poolakey.Payment;
 import ir.cafebazaar.poolakey.config.PaymentConfiguration;
 import ir.cafebazaar.poolakey.config.SecurityCheck;
 import ir.cafebazaar.poolakey.request.PurchaseRequest;
-import ir.cafebazaar.poolakey.callback.GetSkuDetailsCallback;
 import ir.cafebazaar.poolakey.entity.SkuDetails;
 
 import kotlin.Unit;
@@ -139,12 +135,14 @@ public class CafebazaarPoolakeyPlugin extends Plugin {
 
         String productId = call.getString("productId");
         String payload = call.getString("payload", "");
-        String dynamicPriceToken = call.getString("dynamicPriceToken"); // اختیاری برای قیمت پویا
+        String dynamicPriceToken = call.getString("dynamicPriceToken");
 
         if (productId == null || productId.isEmpty()) {
             call.reject("Product ID is required");
             return;
         }
+
+        call.setKeepAlive(true);
 
         PurchaseRequest request = new PurchaseRequest(
                 productId,
@@ -154,13 +152,16 @@ public class CafebazaarPoolakeyPlugin extends Plugin {
 
         payment.purchaseProduct(getActivity().getActivityResultRegistry(), request, purchaseCallback -> {
             purchaseCallback.purchaseFlowBegan(() -> {
-                JSObject result = new JSObject();
-                result.put("state", "PURCHASE_BEGAN");
-                call.resolve(result);
+                JSObject beganData = new JSObject();
+                beganData.put("productId", productId);
+                notifyPurchaseState("PURCHASE_BEGAN", beganData);
                 return Unit.INSTANCE;
             });
 
             purchaseCallback.failedToBeginFlow(throwable -> {
+                JSObject failedData = new JSObject();
+                failedData.put("message", throwable.getMessage());
+                notifyPurchaseState("FAILED_TO_BEGIN", failedData);
                 call.reject("Failed to begin purchase: " + throwable.getMessage(), "PURCHASE_BEGIN_FAILED");
                 return Unit.INSTANCE;
             });
@@ -174,25 +175,43 @@ public class CafebazaarPoolakeyPlugin extends Plugin {
                 purchase.put("purchaseTime", purchaseInfo.getPurchaseTime());
                 purchase.put("productId", purchaseInfo.getProductId());
 
-                JSObject result = new JSObject();
-                result.put("state", "PURCHASED");
-                result.put("purchase", purchase);
-                call.resolve(result);
+                JSObject successData = new JSObject();
+                successData.put("purchase", purchase);
+                notifyPurchaseState("PURCHASED", successData);
+                call.resolve(successData);
                 return Unit.INSTANCE;
             });
 
             purchaseCallback.purchaseCanceled(() -> {
+                JSObject cancelData = new JSObject();
+                cancelData.put("message", "Purchase cancelled by user");
+                notifyPurchaseState("CANCELLED", cancelData);
                 call.reject("Purchase cancelled by user", "PURCHASE_CANCELLED");
                 return Unit.INSTANCE;
             });
 
             purchaseCallback.purchaseFailed(throwable -> {
+                JSObject failData = new JSObject();
+                failData.put("message", throwable.getMessage());
+                notifyPurchaseState("FAILED", failData);
                 call.reject("Purchase failed: " + throwable.getMessage(), "PURCHASE_FAILED");
                 return Unit.INSTANCE;
             });
 
             return Unit.INSTANCE;
         });
+    }
+
+    private void notifyPurchaseState(String state, JSObject data) {
+        JSObject result = new JSObject();
+        result.put("state", state);
+        if (data != null) {
+            for (Iterator<String> it = data.keys(); it.hasNext(); ) {
+                String key = it.next();
+                result.put(key, data.opt(key));
+            }
+        }
+        notifyListeners("purchaseStateChanged", result);
     }
 
     @PluginMethod
