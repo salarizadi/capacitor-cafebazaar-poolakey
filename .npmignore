@@ -1,0 +1,8 @@
+.*
+*.log
+*.tgz
+tsconfig.json
+rollup.config.js
+node_modules/
+android/build/
+example/
