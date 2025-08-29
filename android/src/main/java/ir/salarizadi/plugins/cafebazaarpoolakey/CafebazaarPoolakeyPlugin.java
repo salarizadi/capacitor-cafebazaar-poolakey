@@ -162,7 +162,7 @@ public class CafebazaarPoolakeyPlugin extends Plugin {
                 JSObject failedData = new JSObject();
                 failedData.put("message", throwable.getMessage());
                 notifyPurchaseState("FAILED_TO_BEGIN", failedData);
-                call.reject("Failed to begin purchase: " + throwable.getMessage(), "PURCHASE_BEGIN_FAILED");
+                call.reject("Failed to begin purchase: " + throwable.getMessage(), "FAILED_TO_BEGIN");
                 return Unit.INSTANCE;
             });
 
@@ -177,6 +177,7 @@ public class CafebazaarPoolakeyPlugin extends Plugin {
 
                 JSObject successData = new JSObject();
                 successData.put("purchase", purchase);
+                successData.put("state", "PURCHASED");
                 notifyPurchaseState("PURCHASED", successData);
                 call.resolve(successData);
                 return Unit.INSTANCE;
@@ -186,7 +187,7 @@ public class CafebazaarPoolakeyPlugin extends Plugin {
                 JSObject cancelData = new JSObject();
                 cancelData.put("message", "Purchase cancelled by user");
                 notifyPurchaseState("CANCELLED", cancelData);
-                call.reject("Purchase cancelled by user", "PURCHASE_CANCELLED");
+                call.reject("Purchase cancelled by user", "CANCELLED");
                 return Unit.INSTANCE;
             });
 
@@ -194,7 +195,7 @@ public class CafebazaarPoolakeyPlugin extends Plugin {
                 JSObject failData = new JSObject();
                 failData.put("message", throwable.getMessage());
                 notifyPurchaseState("FAILED", failData);
-                call.reject("Purchase failed: " + throwable.getMessage(), "PURCHASE_FAILED");
+                call.reject("Purchase failed: " + throwable.getMessage(), "FAILED");
                 return Unit.INSTANCE;
             });
 
@@ -293,6 +294,7 @@ public class CafebazaarPoolakeyPlugin extends Plugin {
             JSObject result = new JSObject();
             result.put("state", "DISCONNECTED");
             result.put("disconnected", true);
+            notifyPurchaseState("DISCONNECTED", result);
             call.resolve(result);
         } else {
             call.reject("Not connected to Bazaar service");
