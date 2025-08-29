@@ -38,7 +38,7 @@ await CafebazaarPoolakey.initialize({
 // Listen to purchase state changes
 CafebazaarPoolakey.addListener('purchaseStateChanged', (state) => {
     console.log('Purchase state:', state);
-    // state.state can be: 'PURCHASE_BEGAN', 'PURCHASED', 'CANCELLED', 'FAILED'
+    // state.state can be: 'PURCHASE_BEGAN', 'FAILED_TO_BEGIN', 'PURCHASED', 'CANCELLED', 'FAILED', 'DISCONNECTED'
 });
 
 // Get products
